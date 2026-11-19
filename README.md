@@ -8,7 +8,7 @@ A cloud IoT telemetry pipeline. In this implementation the **ESP32, potentiomete
 
 > Course project – Cloud Computing, SR University, Warangal (B.Tech CSE, II Year I Semester)
 > Course code: `25CAI102PC205` · Faculty: Mr. Bediga Sharan, Assistant Professor
-> *(Check course code and faculty name against your report cover page.)*
+
 
 ---
 
@@ -243,8 +243,8 @@ CORS:
 
 ### Step 6 – Build the image on EC2
 ```bash
-git clone https://github.com/<your-username>/<your-repo-name>.git
-cd <your-repo-name>
+git clone https://github.com/<your-username>/<your-repo-name>.git](https://github.com/2503A51075/aws-iot-streaming-producer.git
+cd aws-iot-streaming-producer
 docker build -t iot-producer:v1 .
 ```
 
@@ -284,37 +284,21 @@ Open `index.html` in a browser on any device with internet access.
 | 5 | Objects created in S3 | `sensor_batch_*.json` files appear | *(Passed)* |
 | 6 | Dashboard shows data | Latest value, status, trend update | *(Passed)* |
 
-*(Confirm each result against your own screenshots. Don't claim zero data loss unless you tested it.)*
-
-## 12. Screenshots
-
-Add your screenshots to an `images/` folder:
-
-```markdown
-![EC2 producer terminal](images/01-ec2-terminal.png)
-![Kinesis stream](images/02-kinesis.png)
-![Lambda function and trigger](images/03-lambda.png)
-![S3 bucket objects](images/04-s3.png)
-![Dashboard](images/05-dashboard.png)
-```
-
-Crop out the AWS account ID and student email in the top-right bar before uploading to a public repository.
-
-## 13. Security Notes
+## 12. Security Notes
 
 - No credentials in source files or in the Docker image; they are injected with `-e` at runtime.
 - Do not commit `.env` files or keys. Add a `.gitignore` containing `.env` and `*.pem`.
 - The dashboard needs **public read** on `incoming-data/`. This is acceptable for simulated data only. For real data, put the dashboard behind authentication (for example CloudFront with signed access or an API).
 - In a normal AWS account, give Lambda a least-privilege role (read Kinesis, write only to `incoming-data/`).
 
-## 14. Cost Control and Cleanup
+## 13. Cost Control and Cleanup
 
 1. `Ctrl + C` in the EC2 terminal to stop the container (`--rm` removes it).
 2. Delete the Kinesis stream (it bills per shard-hour) and disable the Lambda trigger.
 3. Stop the EC2 instance.
 4. Empty the S3 bucket if you no longer need the data.
 
-## 15. Troubleshooting
+## 14. Troubleshooting
 
 | Problem | Likely cause and fix |
 |---|---|
@@ -325,7 +309,7 @@ Crop out the AWS account ID and student email in the top-right bar before upload
 | Dashboard stays on `--.--` | Bucket policy or CORS missing, "Block public access" still on, or wrong bucket name in `index.html`. Check the browser console. |
 | Dashboard stops updating after a while | See limitation 4 below. |
 
-## 16. Limitations
+## 15. Limitations
 
 1. Sensor data is simulated, not from real hardware.
 2. One device, one shard: limited throughput.
@@ -334,9 +318,8 @@ Crop out the AWS account ID and student email in the top-right bar before upload
 5. The dashboard polls S3 every 3 seconds instead of receiving pushed data, so there is a small delay.
 6. The dashboard bucket is publicly readable (see Security Notes).
 
-## 17. Future Enhancements
+## 16. Future Enhancements
 
-*(Replace with the exact list from Section 14 of your report.)*
 - Use a real ESP32 and MQTT through AWS IoT Core.
 - Send alerts (Amazon SNS) when the status is `WARNING (HIGH)`.
 - Store data in DynamoDB or Timestream for history and queries.
@@ -344,7 +327,7 @@ Crop out the AWS account ID and student email in the top-right bar before upload
 - Paginate the S3 listing or write a `latest.json` object so the dashboard always reads the newest data.
 - Host the dashboard on S3 + CloudFront with authentication.
 
-## 18. References
+## 17. References
 
 - Amazon Kinesis Data Streams Developer Guide – https://docs.aws.amazon.com/streams/
 - AWS Lambda Developer Guide – https://docs.aws.amazon.com/lambda/
