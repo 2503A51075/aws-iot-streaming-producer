@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Potentiometer Stream Dashboard</title>
+    <!-- Chart.js for real-time visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #4fc3f7;
+        }
+        .card-container {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .card {
+            flex: 1;
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #333;
+        }
+        .value-display {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #00e676;
+        }
+        .status-display {
+            font-size: 1.2em;
+            color: #ffb74d;
+            margin-top: 5px;
+        }
+        .chart-box {
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Streaming Data Physical Producer Dashboard</h1>
+    
+    <div class="card-container">
+        <div class="card">
+            <h3>Virtual OLED Current Value</h3>
+            <div id="sensorValue" class="value-display">--.--</div>
+            <div id="sensorStatus" class="status-display">STATUS: WAITING...</div>
+        </div>
+        <div class="card">
+            <h3>Device Metadata</h3>
+            <p><strong>Device ID:</strong> <span id="deviceId">SIMULATED_ESP32_01</span></p>
+            <p><strong>Last Updated:</strong> <span id="timestamp">--:--:--</span></p>
+        </div>
+    </div>
+
+    <div class="chart-box">
+        <canvas id="streamChart"></canvas>
+    </div>
+</div>
+
+<script>
+    const BUCKET_NAME = "sensor-stream-data-2503a51075";
+    const S3_BUCKET_URL = `https://${BUCKET_NAME}.s3.us-east-1.amazonaws.com/`;
+
+    // Initialize Chart.js
+    const ctx = document.getElementById('streamChart').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Potentiometer Reading (0-100)',
+                data: [],
+                borderColor: '#4fc3f7',
+                backgroundColor: 'rgba(79, 195, 247, 0.2)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { min: 0, max: 100 }
+            }
+        }
+    });
+
+    function addData(label, data) {
+        if (chart.data.labels.length > 15) {
+            chart.data.labels.shift();
+            chart.data.datasets[0].data.shift();
+        }
+        chart.data.labels.push(label);
+        chart.data.datasets[0].data.push(data);
+        chart.update();
+    }
+
+    function updateDashboard(sensorValue, status, timeStr, deviceId) {
+        document.getElementById('sensorValue').innerText = Number(sensorValue).toFixed(2);
+        document.getElementById('sensorStatus').innerText = "STATUS: " + status;
+        document.getElementById('timestamp').innerText = timeStr;
+        if (deviceId) document.getElementById('deviceId').innerText = deviceId;
+
+        const valElem = document.getElementById('sensorValue');
+        if (sensorValue > 75) valElem.style.color = '#ff5252';
+        else if (sensorValue < 35) valElem.style.color = '#4fc3f7';
+        else valElem.style.color = '#00e676';
+
+        addData(timeStr, sensorValue);
+    }
+
+    async function fetchLatestS3Data() {
+        try {
+            const listResponse = await fetch(`${S3_BUCKET_URL}?list-type=2&prefix=incoming-data/`);
+            const xmlText = await listResponse.text();
+            
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+            const keys = Array.from(xmlDoc.getElementsByTagName("Key")).map(node => node.textContent);
+            
+            if (keys.length === 0) return;
+            
+            const latestKey = keys[keys.length - 1];
+            const fileResponse = await fetch(`${S3_BUCKET_URL}${latestKey}`);
+            const dataArray = await fileResponse.json();
+            
+            if (dataArray && dataArray.length > 0) {
+                const latestRecord = dataArray[dataArray.length - 1];
+                const timeStr = new Date(latestRecord.timestamp * 1000).toLocaleTimeString();
+                
+                updateDashboard(
+                    latestRecord.sensor_value, 
+                    latestRecord.status, 
+                    timeStr, 
+                    latestRecord.device_id
+                );
+            }
+        } catch (err) {
+            console.error("Error fetching live S3 data:", err);
+        }
+    }
+
+    setInterval(fetchLatestS3Data, 3000);
+    fetchLatestS3Data();
+</script>
+</body>
+</html>
