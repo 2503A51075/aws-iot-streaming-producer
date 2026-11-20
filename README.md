@@ -201,7 +201,7 @@ sudo yum install -y docker git
 sudo systemctl start docker
 sudo usermod -aG docker ec2-user   # log out and in again
 ```
-
+.
 ### Step 5 – Allow the dashboard to read S3
 Turn off "Block public access" for the bucket (only acceptable because the data is simulated), then add a policy and CORS rule like these. Match them to what you actually configured.
 
