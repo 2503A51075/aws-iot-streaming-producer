@@ -41,7 +41,7 @@ The project idea is a physical producer: a potentiometer generates a sensor valu
 
 It demonstrates the complete path of IoT data: **generation → ingestion → processing → storage → visualization**.
 
-## 2. Objectives
+## 2. Objectives.
 
 - Simulate an ESP32 potentiometer sensor and OLED display in software.
 - Package the producer as a portable Docker image.
