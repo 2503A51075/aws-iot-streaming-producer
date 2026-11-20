@@ -7,7 +7,7 @@ A cloud IoT telemetry pipeline. In this implementation the **ESP32, potentiomete
 **Docker producer (EC2) → Amazon Kinesis → AWS Lambda → Amazon S3 → Web dashboard**
 
 > Course project – Cloud Computing, SR University, Warangal (B.Tech CSE, II Year I Semester)
-> Course code: `25CAI102PC205` · Faculty: Mr. Bediga Sharan, Assistant Professor
+> Course code: `25CAI102PC205` · Faculty: Mr. Bediga Sharan, Assistant Professor.
 
 
 ---
